@@ -63,16 +63,32 @@
   * @{
   */
 
-#define USBD_VID     1155
-#define USBD_LANGID_STRING     1033
-#define USBD_MANUFACTURER_STRING     "OULWare"
-#define USBD_PID_FS     0x4321 //22315
-#define USBD_PRODUCT_STRING_FS     "CrsfJoystick"
-#define USBD_CONFIGURATION_STRING_FS     "CrsfJoystick Config"
-#define USBD_INTERFACE_STRING_FS     "CrsfJoystick Interface"
+#define STRINGIFY_TMP(S) #S
+#define STRINGIFY(S) STRINGIFY_TMP(S)
+#define CONCAT(A, B) A##B
+
+#if PROTO_CRSF
+#define PROD_PREFIX CrsfJoystick
+#elif PROTO_SBUS
+#define PROD_PREFIX SbusJoystick
+#endif
+
+
+#define USBD_VID                      1155
+#define USBD_LANGID_STRING            1033
+#define USBD_MANUFACTURER_STRING      "OULWare"
+#define USBD_PID_FS                   0x4321 //22315
+#define USBD_PRODUCT_STRING_FS        STRINGIFY(PROD_PREFIX)
+#define USBD_CONFIGURATION_STRING_FS  STRINGIFY(CONCAT(PROD_PREFIX,Config))
+#define USBD_INTERFACE_STRING_FS      STRINGIFY(CONCAT(PROD_PREFIX,Interface))
+//#define USBD_PRODUCT_STRING_FS     "CrsfJoystick"
+//#define USBD_CONFIGURATION_STRING_FS     "CrsfJoystick Config"
+//#define USBD_INTERFACE_STRING_FS     "CrsfJoystick Interface"
 
 /* USER CODE BEGIN PRIVATE_DEFINES */
-
+static const char * USBD_PRODUCT = USBD_PRODUCT_STRING_FS;
+static const char * USBD_CONFIGURATION = USBD_CONFIGURATION_STRING_FS;
+static const char * USBD_INTERFACE = USBD_INTERFACE_STRING_FS;
 /* USER CODE END PRIVATE_DEFINES */
 
 /**
@@ -248,14 +264,8 @@ uint8_t * USBD_FS_LangIDStrDescriptor(USBD_SpeedTypeDef speed, uint16_t *length)
   */
 uint8_t * USBD_FS_ProductStrDescriptor(USBD_SpeedTypeDef speed, uint16_t *length)
 {
-  if(speed == 0)
-  {
-    USBD_GetString((uint8_t *)USBD_PRODUCT_STRING_FS, USBD_StrDesc, length);
-  }
-  else
-  {
-    USBD_GetString((uint8_t *)USBD_PRODUCT_STRING_FS, USBD_StrDesc, length);
-  }
+  UNUSED(speed);
+  USBD_GetString((uint8_t *)USBD_PRODUCT, USBD_StrDesc, length);
   return USBD_StrDesc;
 }
 
@@ -300,14 +310,8 @@ uint8_t * USBD_FS_SerialStrDescriptor(USBD_SpeedTypeDef speed, uint16_t *length)
   */
 uint8_t * USBD_FS_ConfigStrDescriptor(USBD_SpeedTypeDef speed, uint16_t *length)
 {
-  if(speed == USBD_SPEED_HIGH)
-  {
-    USBD_GetString((uint8_t *)USBD_CONFIGURATION_STRING_FS, USBD_StrDesc, length);
-  }
-  else
-  {
-    USBD_GetString((uint8_t *)USBD_CONFIGURATION_STRING_FS, USBD_StrDesc, length);
-  }
+  UNUSED(speed);
+  USBD_GetString((uint8_t *)USBD_CONFIGURATION, USBD_StrDesc, length);
   return USBD_StrDesc;
 }
 
@@ -319,14 +323,8 @@ uint8_t * USBD_FS_ConfigStrDescriptor(USBD_SpeedTypeDef speed, uint16_t *length)
   */
 uint8_t * USBD_FS_InterfaceStrDescriptor(USBD_SpeedTypeDef speed, uint16_t *length)
 {
-  if(speed == 0)
-  {
-    USBD_GetString((uint8_t *)USBD_INTERFACE_STRING_FS, USBD_StrDesc, length);
-  }
-  else
-  {
-    USBD_GetString((uint8_t *)USBD_INTERFACE_STRING_FS, USBD_StrDesc, length);
-  }
+  UNUSED(speed);
+  USBD_GetString((uint8_t *)USBD_INTERFACE, USBD_StrDesc, length);
   return USBD_StrDesc;
 }
 

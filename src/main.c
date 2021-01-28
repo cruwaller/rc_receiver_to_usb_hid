@@ -242,14 +242,8 @@ GPIO_Setup(uint32_t io, uint32_t mode, int pullup)
   return (struct gpio_pin){.reg = port, .bit = (1 << pin)};
 }
 
-#if NEGATIVE_ALLOWED
-#define MAP_x16 MAP_I16
-#else
-#define MAP_x16 MAP_U16
-#endif
-
 struct hid_report {
-  int16_t analogs[NUM_ANALOGS];
+  uint16_t analogs[NUM_ANALOGS];
   uint8_t buttons[((NUM_BUTTONS + 7) / 8)];
 } PACKED;
 
@@ -268,7 +262,7 @@ void send_to_usb(uint16_t * rc_data, uint8_t len)
 
   // analog channels
   for (iter = 0; iter < NUM_ANALOGS; iter++) {
-    report.analogs[iter] = MAP_x16(rc_data[iter],
+    report.analogs[iter] = MAP_U16(rc_data[iter],
       CHANNEL_OUT_VALUE_MIN, CHANNEL_OUT_VALUE_MAX,
       ANALOG_MIN, ANALOG_MAX);
     if (iter == 1) /* Y is inverted */
@@ -294,7 +288,7 @@ int main(void)
   /* MCU Configuration--------------------------------------------------------*/
   __HAL_RCC_AFIO_CLK_ENABLE();
   __HAL_RCC_PWR_CLK_ENABLE();
-  __HAL_AFIO_REMAP_SWJ_DISABLE();
+  //__HAL_AFIO_REMAP_SWJ_DISABLE();
 
     /* Init DWT if present */
 #ifdef DWT_BASE

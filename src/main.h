@@ -61,8 +61,8 @@ enum {
   IO_PORT_E = 'E',
   IO_PORT_F = 'F'
 };
-#define CONCAT(_P) IO_PORT_ ## _P
-#define IO_CREATE_IMPL(port, pin) ((CONCAT(port) * 16) + pin)
+#define IO_CONCAT(_P) IO_PORT_ ## _P
+#define IO_CREATE_IMPL(port, pin) ((IO_CONCAT(port) * 16) + pin)
 #define IO_CREATE(...)  IO_CREATE_IMPL(__VA_ARGS__)
 #define IO_GET_PORT(_p) (((_p) / 16) - 'A')
 #define IO_GET_PIN(_p)  ((_p) % 16)

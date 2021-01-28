@@ -69,47 +69,18 @@ EndBSPDependencies */
 /** @defgroup USBD_HID_Private_Defines
   * @{
   */
-#if 0
-__ALIGN_BEGIN static uint8_t HID_Joystick_ReportDesc[]  __ALIGN_END =
-{
-  0x05, 0x01,                    // USAGE_PAGE (Generic Desktop)
-  0x09, 0x05,                    // USAGE (Game Pad)
-  0xa1, 0x01,                    // COLLECTION (Application)
-  0xa1, 0x00,                    //   COLLECTION (Physical)
-  0x05, 0x01,                    //     USAGE_PAGE (Generic Desktop)
-  0x09, 0x30,                    //     USAGE (X)
-  0x09, 0x31,                    //     USAGE (Y)
-  0x09, 0x32,                    //     USAGE (Z)
-  0x09, 0x33,                    //     USAGE (Rx)
-  0x09, 0x35,                    //     USAGE (Rz)
-  0x09, 0x34,                    //     USAGE (Ry)
-  0x09, 0x36,                    //     USAGE (Slider)
-  0x09, 0x37,                    //     USAGE (Dial)
-  0x15, 0x81,                    //     LOGICAL_MINIMUM (-127)
-  0x25, 0x7f,                    //     LOGICAL_MAXIMUM (127)
-  0x75, 0x08,                    //     REPORT_SIZE (8)
-  0x95, 0x08,                    //     REPORT_COUNT (8)
-  0x81, 0x02,                    //     INPUT (Data,Var,Abs)
-  0x05, 0x09,                    //     USAGE_PAGE (Button)
-  0x19, 0x01,                    //     USAGE_MINIMUM (Button 1)
-  0x29, 0x08,                    //     USAGE_MAXIMUM (Button 8)
-  0x15, 0x00,                    //     LOGICAL_MINIMUM (0)
-  0x25, 0x01,                    //     LOGICAL_MAXIMUM (1)
-  0x95, 0x08,                    //     REPORT_COUNT (8)
-  0x75, 0x01,                    //     REPORT_SIZE (1)
-  0x81, 0x02,                    //     INPUT (Data,Var,Abs)
-  0xc0,                          //   END_COLLECTION
-  0xc0                           /*     END_COLLECTION	             */
-};
-#else
-
+#if 8 < NUM_BUTTONS
+#error "Up to 8 buttons!"
+#endif
 #if NUM_ANALOGS < 1
 #error "NUM_ANALOGS min is 1"
 #elif 4 < NUM_ANALOGS
 #error "NUM_ANALOGS max is 4"
 #endif
 
-__ALIGN_BEGIN static uint8_t HID_Joystick_ReportDesc[]  __ALIGN_END =
+#define SIZE_OF_REPORT sizeof(HID_Joystick_ReportDesc)
+
+static const uint8_t HID_Joystick_ReportDesc[] =
 {
   0x05, 0x01,                    // USAGE_PAGE (Generic Desktop)
   0x09, 0x05,                    // USAGE (Game Pad)
@@ -125,37 +96,26 @@ __ALIGN_BEGIN static uint8_t HID_Joystick_ReportDesc[]  __ALIGN_END =
   0x09, 0x33,                    //     USAGE (Rx)
 #endif
 #if 3 < NUM_ANALOGS
-  0x09, 0x35,                    //     USAGE (Rz)
+  0x09, 0x34,                    //     USAGE (Ry)
 #endif
-  //0x15, 0x81,                    //     LOGICAL_MINIMUM (-127)
-  //0x25, 0x7f,                    //     LOGICAL_MAXIMUM (127)
-#if ANALOG_MIN == 0
-  0x15, 0x00,                    //     LOGICAL_MINIMUM (0)
-#elif ANALOG_MIN == -1023
-  0x16, 0x01, 0xFC,              //     LOGICAL_MINIMUM (-1023)
-#endif
-#if ANALOG_MAX == 1023
-  0x26, 0xff, 0x03,              //     LOGICAL_MAXIMUM (1023)
-#elif ANALOG_MAX == 2047
-  0x26, 0xff, 0x07,              //     LOGICAL_MAXIMUM (2047)
-#endif
+  0x16, 0x00, 0x00,              //     LOGICAL_MINIMUM (0)
+  0x26, 0xFF, 0x07,              //     LOGICAL_MAXIMUM (2047)
   0x75, 0x10,                    //     REPORT_SIZE (16)
-  0x95, NUM_ANALOGS,             //     REPORT_COUNT (4)
+  0x95, NUM_ANALOGS,             //     REPORT_COUNT (1...4)
   0x81, 0x02,                    //     INPUT (Data,Var,Abs)
-
   /* Buttons */
   0x05, 0x09,                    //     USAGE_PAGE (Button)
   0x19, 0x01,                    //     USAGE_MINIMUM (Button 1)
-  0x29, NUM_BUTTONS,             //     USAGE_MAXIMUM (Button 4)
+  0x29, 0x08,                    //     USAGE_MAXIMUM (Button 8)
   0x15, 0x00,                    //     LOGICAL_MINIMUM (0)
   0x25, 0x01,                    //     LOGICAL_MAXIMUM (1)
-  0x95, NUM_BUTTONS,             //     REPORT_COUNT (4)
   0x75, 0x01,                    //     REPORT_SIZE (1)
+  0x95, 0x08,                    //     REPORT_COUNT (8)
   0x81, 0x02,                    //     INPUT (Data,Var,Abs)
+
   0xc0,                          //   END_COLLECTION
-  0xc0                           // END_COLLECTION
+  0xc0,                          // END_COLLECTION
 };
-#endif
 
 /**
   * @}
@@ -256,7 +216,7 @@ __ALIGN_BEGIN static uint8_t USBD_HID_CfgDesc[USB_HID_CONFIG_DESC_SIZ]  __ALIGN_
   0x00,         /*bCountryCode: Hardware target country*/
   0x01,         /*bNumDescriptors: Number of HID class descriptors to follow*/
   0x22,         /*bDescriptorType*/
-  sizeof(HID_Joystick_ReportDesc),/*wItemLength: Total length of Report descriptor*/
+  SIZE_OF_REPORT,/*wItemLength: Total length of Report descriptor*/
   0x00,
   /******************** Descriptor of Mouse endpoint ********************/
   /* 27 */
@@ -306,7 +266,7 @@ __ALIGN_BEGIN static uint8_t USBD_HID_CfgHSDesc[USB_HID_CONFIG_DESC_SIZ]  __ALIG
   0x00,         /*bCountryCode: Hardware target country*/
   0x01,         /*bNumDescriptors: Number of HID class descriptors to follow*/
   0x22,         /*bDescriptorType*/
-  sizeof(HID_Joystick_ReportDesc),/*wItemLength: Total length of Report descriptor*/
+  SIZE_OF_REPORT,/*wItemLength: Total length of Report descriptor*/
   0x00,
   /******************** Descriptor of Mouse endpoint ********************/
   /* 27 */
@@ -356,7 +316,7 @@ __ALIGN_BEGIN static uint8_t USBD_HID_OtherSpeedCfgDesc[USB_HID_CONFIG_DESC_SIZ]
   0x00,         /*bCountryCode: Hardware target country*/
   0x01,         /*bNumDescriptors: Number of HID class descriptors to follow*/
   0x22,         /*bDescriptorType*/
-  sizeof(HID_Joystick_ReportDesc),/*wItemLength: Total length of Report descriptor*/
+  SIZE_OF_REPORT,/*wItemLength: Total length of Report descriptor*/
   0x00,
   /******************** Descriptor of Mouse endpoint ********************/
   /* 27 */
@@ -383,7 +343,7 @@ __ALIGN_BEGIN static uint8_t USBD_HID_Desc[USB_HID_DESC_SIZ]  __ALIGN_END  =
   0x00,         /*bCountryCode: Hardware target country*/
   0x01,         /*bNumDescriptors: Number of HID class descriptors to follow*/
   0x22,         /*bDescriptorType*/
-  sizeof(HID_Joystick_ReportDesc),/*wItemLength: Total length of Report descriptor*/
+  SIZE_OF_REPORT,/*wItemLength: Total length of Report descriptor*/
   0x00,
 };
 
@@ -518,15 +478,15 @@ static uint8_t  USBD_HID_Setup(USBD_HandleTypeDef *pdev,
           break;
 
         case USB_REQ_GET_DESCRIPTOR:
-          if (req->wValue >> 8 == HID_REPORT_DESC)
+          if ((req->wValue >> 8) == HID_REPORT_DESC)
           {
-            len = MIN(sizeof(HID_Joystick_ReportDesc), req->wLength);
-            pbuf = HID_Joystick_ReportDesc;
+            len = MIN(SIZE_OF_REPORT, req->wLength);
+            pbuf = (uint8_t*)HID_Joystick_ReportDesc;
           }
-          else if (req->wValue >> 8 == HID_DESCRIPTOR_TYPE)
+          else if ((req->wValue >> 8) == HID_DESCRIPTOR_TYPE)
           {
             pbuf = USBD_HID_Desc;
-            len = MIN(USB_HID_DESC_SIZ, req->wLength);
+            len = MIN(sizeof(USBD_HID_Desc), req->wLength);
           }
           else
           {

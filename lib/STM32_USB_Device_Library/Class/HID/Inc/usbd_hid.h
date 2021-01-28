@@ -36,17 +36,12 @@ extern "C" {
   * @brief This file is the Header file for usbd_hid.c
   * @{
   */
-#define NEGATIVE_ALLOWED 1
 
-#define NUM_ANALOGS 4
-#define NUM_BUTTONS 4
-#if NEGATIVE_ALLOWED
-#define ANALOG_MIN  -1023
-#define ANALOG_MAX  1023
-#else
-#define ANALOG_MIN  0
-#define ANALOG_MAX  2047
-#endif
+#define NUM_ANALOGS 0x4U
+#define NUM_BUTTONS 0x4U
+#define ANALOG_MIN  0U
+#define ANALOG_MAX  2047U
+
 
 /** @defgroup USBD_HID_Exported_Defines
   * @{
@@ -120,7 +115,7 @@ USBD_HID_HandleTypeDef;
   */
 
 extern USBD_ClassTypeDef  USBD_HID;
-#define USBD_HID_CLASS    &USBD_HID
+
 /**
   * @}
   */
