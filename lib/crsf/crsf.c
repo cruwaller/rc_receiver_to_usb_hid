@@ -36,8 +36,9 @@ static uint8_t SerialInPacketPtr;      // index where we are reading/writing
 static uint16_t _channels[16];
 
 
-static void crsf_check_msg(uint8_t const * const input)
+static uint8_t crsf_check_msg(uint8_t const * const input)
 {
+    uint8_t ret = 0;
     switch (input[0]) {
         case CRSF_FRAMETYPE_RC_CHANNELS_PACKED: {
             crsf_channels_t * channels = (crsf_channels_t*)&input[1];
@@ -57,6 +58,7 @@ static void crsf_check_msg(uint8_t const * const input)
             _channels[13] = channels->ch13;
             _channels[14] = channels->ch14;
             _channels[15] = channels->ch15;
+            ret = 1;
             break;
         }
         case CRSF_FRAMETYPE_PARAMETER_WRITE: {
@@ -76,13 +78,14 @@ static void crsf_check_msg(uint8_t const * const input)
         default:
             break;
     };
+    return ret;
 }
 
 
 
 uint8_t crsf_parse_byte(uint8_t inChar)
 {
-    uint8_t *packet_ptr = NULL;
+    uint8_t ret = 0;
 
     if (SerialInPacketPtr >= sizeof(SerialInBuffer)) {
         // we reached the maximum allowable packet length,
@@ -122,8 +125,7 @@ uint8_t crsf_parse_byte(uint8_t inChar)
             if ((SerialInPacketPtr - SerialInPacketStart) >= (SerialInPacketLen)) {
                 /* Check packet CRC */
                 if (SerialInCrc == inChar) {
-                    packet_ptr = &SerialInBuffer[SerialInPacketStart];
-                    crsf_check_msg(packet_ptr);
+                    ret = crsf_check_msg(&SerialInBuffer[SerialInPacketStart]);
                 }
 
                 // packet handled, start next
@@ -137,7 +139,7 @@ uint8_t crsf_parse_byte(uint8_t inChar)
         }
     }
 
-    return !!packet_ptr;
+    return ret;
 }
 
 

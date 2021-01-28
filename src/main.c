@@ -270,6 +270,7 @@ void send_to_usb(uint16_t * rc_data, uint8_t len)
     uint32_t diff = micros() - test_triggered;
     (void)diff;
   }
+  GPIO_Write(test_io_out, 0);
 #endif
 
   // analog channels
@@ -353,7 +354,7 @@ int main(void)
     }
 
 #if defined(LATENCY_TEST)
-    if (300 <= (HAL_GetTick() - last)) {
+    if (200 <= (HAL_GetTick() - last)) {
       last = HAL_GetTick();
       // TODO: random timing!!
       test_triggered = micros();
@@ -361,7 +362,7 @@ int main(void)
       GPIO_Write(test_io_out, 1);
       test_state = 1;
     } else if (test_state && 5 <= (HAL_GetTick() - last)) {
-      GPIO_Write(test_io_out, 0);
+      //GPIO_Write(test_io_out, 0);
       test_state = 0;
     }
 #endif
