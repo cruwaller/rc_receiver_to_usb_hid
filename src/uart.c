@@ -469,6 +469,12 @@ void uart_init(uint32_t baud, uint32_t pin_rx, uint32_t pin_tx)
     }
   }
 
+#if PROTO_SBUS
+  uart_ptr->CR2 |= LL_USART_STOPBITS_2;
+  UART_CR_RX |= LL_USART_PARITY_EVEN;
+  UART_CR_TX |= LL_USART_PARITY_EVEN;
+#endif
+
   /* Store handles */
   UART_handle_tx = uart_ptr;
   UART_handle_rx = uart_ptr_rx;

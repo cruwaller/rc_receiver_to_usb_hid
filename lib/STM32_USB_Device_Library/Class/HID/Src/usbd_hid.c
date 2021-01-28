@@ -72,10 +72,8 @@ EndBSPDependencies */
 #if 8 < NUM_BUTTONS
 #error "Up to 8 buttons!"
 #endif
-#if NUM_ANALOGS < 1
-#error "NUM_ANALOGS min is 1"
-#elif 4 < NUM_ANALOGS
-#error "NUM_ANALOGS max is 4"
+#if NUM_ANALOGS != 4
+#error "NUM_ANALOGS must be 4"
 #endif
 
 #define SIZE_OF_REPORT sizeof(HID_Joystick_ReportDesc)
@@ -89,19 +87,13 @@ static const uint8_t HID_Joystick_ReportDesc[] =
   /* Gimbals */
   0x05, 0x01,                    //     USAGE_PAGE (Generic Desktop)
   0x09, 0x30,                    //     USAGE (X)
-#if 1 < NUM_ANALOGS
   0x09, 0x31,                    //     USAGE (Y)
-#endif
-#if 2 < NUM_ANALOGS
   0x09, 0x33,                    //     USAGE (Rx)
-#endif
-#if 3 < NUM_ANALOGS
   0x09, 0x34,                    //     USAGE (Ry)
-#endif
   0x16, 0x00, 0x00,              //     LOGICAL_MINIMUM (0)
   0x26, 0xFF, 0x07,              //     LOGICAL_MAXIMUM (2047)
   0x75, 0x10,                    //     REPORT_SIZE (16)
-  0x95, NUM_ANALOGS,             //     REPORT_COUNT (1...4)
+  0x95, 0x04,                    //     REPORT_COUNT (4)
   0x81, 0x02,                    //     INPUT (Data,Var,Abs)
   /* Buttons */
   0x05, 0x09,                    //     USAGE_PAGE (Button)

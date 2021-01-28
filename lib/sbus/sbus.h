@@ -15,7 +15,11 @@
 #define CHANNEL_OUT_VALUE_MIN   172
 #define CHANNEL_OUT_VALUE_MID   992
 #define CHANNEL_OUT_VALUE_MAX   1811
-#define RX_BAUDRATE             115200
+#if SBUS_FAST
+#define RX_BAUDRATE             200000
+#else
+#define RX_BAUDRATE             100000
+#endif
 
 typedef struct SbusChannels_s {
     // 176 bits of data (11 bits per channel * 16 channels) = 22 bytes.

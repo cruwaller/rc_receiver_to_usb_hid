@@ -32,15 +32,21 @@
 /* Private includes ----------------------------------------------------------*/
 
 /* Private typedef -----------------------------------------------------------*/
+enum {
+  AUX1 = NUM_ANALOGS,
+  AUX2, AUX3, AUX4, AUX5, AUX6, AUX7, AUX8, AUX9,
+  AUX10, AUX11, AUX12, AUX13, AUX14, AUX15
+};
 
 /* Private define ------------------------------------------------------------*/
 
 /* Private macro -------------------------------------------------------------*/
-#define PIN_IO_TEST_OUT GPIO('B', 10)
-#define PIN_IO_TEST_IN  GPIO('B', 9)
 
 /* Private variables ---------------------------------------------------------*/
-#if defined(PIN_IO_TEST_OUT)
+#if defined(LATENCY_TEST)
+#define PIN_IO_TEST_OUT GPIO('B', 4)
+#define PIN_IO_TEST_IN  GPIO('B', 3)
+
 struct gpio_pin test_io_out;
 struct gpio_pin test_io_in;
 uint32_t test_triggered;
@@ -231,30 +237,36 @@ void GPIO_SetupPin(GPIO_TypeDef *regs, uint32_t pos, uint32_t mode, int pullup)
 }
 
 struct gpio_pin
-GPIO_Setup(uint32_t io, uint32_t mode, int pullup)
+GPIO_Setup(uint32_t gpio, uint32_t mode, int pullup)
 {
-  uint32_t pin = IO_GET_PIN(io);
-  io = IO_GET_PORT(io);
+  uint32_t pin = IO_GET_PIN(gpio);
+  uint32_t io = IO_GET_PORT(gpio);
   GPIO_TypeDef *port = (void*)((uintptr_t)GPIOA_BASE + (io * 0x0400UL));
 
   GPIO_SetupPin(port, pin, mode, pullup);
 
+  if (gpio == GPIO('A', 13) || gpio == GPIO('A', 14))
+      // Disable SWD to free PA13, PA14
+      //AFIO->MAPR = AFIO_MAPR_SWJ_CFG_DISABLE;
+      __HAL_AFIO_REMAP_SWJ_DISABLE();
+  else if ((gpio == GPIO('A', 15)) || (gpio == GPIO('B', 3)) || (gpio == GPIO('B', 4)))
+      // Disable JTAG-DP
+      __HAL_AFIO_REMAP_SWJ_NOJTAG();
+
   return (struct gpio_pin){.reg = port, .bit = (1 << pin)};
 }
 
-struct hid_report {
-  uint16_t analogs[NUM_ANALOGS];
-  uint8_t buttons[((NUM_BUTTONS + 7) / 8)];
-} PACKED;
+uint8_t hid_data[2*NUM_ANALOGS + 1];
 
 void send_to_usb(uint16_t * rc_data, uint8_t len)
 {
   uint8_t iter, btns;
-  struct hid_report report;
+  uint16_t value;
 
-#if defined(PIN_IO_TEST_OUT)
-  if ((2 * CHANNEL_OUT_VALUE_MIN) <= rc_data[5]) {
-    GPIO_Write(test_io_in, 1);
+#if defined(LATENCY_TEST)
+  // 1st switch (AUX) is used to trigger
+  if ((2 * CHANNEL_OUT_VALUE_MIN) <= rc_data[AUX1]) {
+    GPIO_Write(test_io_in, 0);
     uint32_t diff = micros() - test_triggered;
     (void)diff;
   }
@@ -262,20 +274,22 @@ void send_to_usb(uint16_t * rc_data, uint8_t len)
 
   // analog channels
   for (iter = 0; iter < NUM_ANALOGS; iter++) {
-    report.analogs[iter] = MAP_U16(rc_data[iter],
+    /*report.analogs[iter] =*/
+    value = MAP_U16(rc_data[iter],
       CHANNEL_OUT_VALUE_MIN, CHANNEL_OUT_VALUE_MAX,
       ANALOG_MIN, ANALOG_MAX);
-    if (iter == 1) /* Y is inverted */
-      report.analogs[1] = ANALOG_MAX - report.analogs[1];
+    hid_data[2*iter] = (uint8_t)value;
+    hid_data[2*iter+1] = (uint8_t)(value >> 8);
   }
 
   // buttons are bit
-  for (btns = iter; btns < len; btns++) {
-    uint8_t idx = (btns - NUM_ANALOGS);
-    if (CHANNEL_OUT_VALUE_MID <= rc_data[btns])
-      report.buttons[idx/8] |= (1 << idx);
+  value = 0;
+  for (btns = 0; iter < len; iter++, btns++) {
+    if (CHANNEL_OUT_VALUE_MID <= rc_data[iter])
+      value |= (1 << btns);
   }
-  USBD_HID_SendReport(&hUsbDeviceFS, (uint8_t*)&report, sizeof(report));
+  hid_data[2*NUM_ANALOGS] = (uint8_t)value;
+  USBD_HID_SendReport(&hUsbDeviceFS, (uint8_t*)&hid_data, sizeof(hid_data));
 }
 
 
@@ -306,7 +320,7 @@ int main(void)
   gpio_port_clock(GPIOD_BASE); // USB ??
 #endif
 
-#if defined(PIN_IO_TEST_OUT)
+#if defined(LATENCY_TEST)
   test_io_out = GPIO_Setup(PIN_IO_TEST_OUT, GPIO_OUTPUT, -1);
   test_io_in = GPIO_Setup(PIN_IO_TEST_IN, GPIO_OUTPUT, -1);
 #endif
@@ -317,14 +331,14 @@ int main(void)
   MX_USB_DEVICE_Init();
 
   /* Infinite loop */
+#if defined(LATENCY_TEST)
   uint32_t last = HAL_GetTick();
+  uint8_t test_state = 0;
+#endif
   uint16_t channels[NUM_ANALOGS + NUM_BUTTONS];
   uint8_t data;
   while (1) {
-    if (uart_receive_timeout(&data, 1, 20) == UART_OK) {
-#if defined(PIN_IO_TEST_OUT)
-        GPIO_Write(test_io_out, 0);
-#endif
+    if (uart_receive_timeout(&data, 1, 1) == UART_OK) {
 #if PROTO_CRSF
       if (crsf_parse_byte(data)) {
         crsf_get_rc_data(channels, ARRAY_SIZE(channels));
@@ -336,17 +350,21 @@ int main(void)
         send_to_usb(channels, ARRAY_SIZE(channels));
       }
 #endif
-
-#if defined(PIN_IO_TEST_OUT)
-      if (200 <= (HAL_GetTick() - last)) {
-        last = HAL_GetTick();
-        // TODO: random timing!!
-        test_triggered = micros();
-        GPIO_Write(test_io_in, 0);
-        GPIO_Write(test_io_out, 1);
-      }
-#endif
     }
+
+#if defined(LATENCY_TEST)
+    if (300 <= (HAL_GetTick() - last)) {
+      last = HAL_GetTick();
+      // TODO: random timing!!
+      test_triggered = micros();
+      GPIO_Write(test_io_in, 1);
+      GPIO_Write(test_io_out, 1);
+      test_state = 1;
+    } else if (test_state && 5 <= (HAL_GetTick() - last)) {
+      GPIO_Write(test_io_out, 0);
+      test_state = 0;
+    }
+#endif
   }
 }
 
