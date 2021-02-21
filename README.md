@@ -1,4 +1,4 @@
-#compilation
+# compilation
 Platformio is used. Check https://docs.platformio.org/en/latest/core/quickstart.html for more info.
 
 # install
