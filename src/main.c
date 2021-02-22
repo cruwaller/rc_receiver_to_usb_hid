@@ -316,10 +316,11 @@ int main(void)
   HAL_Init();
   /* Configure the system clock */
   SystemClock_Config();
-  /* Initialize all configured peripherals */
-#ifdef GPIOD_BASE
-  gpio_port_clock(GPIOD_BASE); // USB ??
-#endif
+  /* Init USB D+ pin to avoid issue with clone Bluepill boards.
+   * Source: http://amitesh-singh.github.io/stm32/2017/05/27/Overcoming-wrong-pullup-in-blue-pill.html
+   */
+  GPIO_Setup(GPIO('A', 12), GPIO_OUTPUT, -1);
+  HAL_Delay(5);
 
 #if defined(LATENCY_TEST)
   test_io_out = GPIO_Setup(PIN_IO_TEST_OUT, GPIO_OUTPUT, -1);
