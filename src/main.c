@@ -24,6 +24,8 @@
 #include "crsf.h"
 #elif PROTO_SBUS
 #include "sbus.h"
+#elif PROTO_GHST
+#include "ghst.h"
 #endif
 #include "usb_device.h"   // hUsbDeviceFS
 #include "usbd_hid.h"     // USBD_HID_SendReport
@@ -349,6 +351,11 @@ int main(void)
 #elif PROTO_SBUS
       if (sbus_parse_byte(data)) {
         sbus_get_rc_data(channels, ARRAY_SIZE(channels));
+        send_to_usb(channels, ARRAY_SIZE(channels));
+      }
+#elif PROTO_GHST
+      if (ghst_parse_byte(data)) {
+        ghst_get_rc_data(channels, ARRAY_SIZE(channels));
         send_to_usb(channels, ARRAY_SIZE(channels));
       }
 #endif

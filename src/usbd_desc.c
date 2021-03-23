@@ -71,6 +71,8 @@
 #define PROD_PREFIX CrsfJoystick
 #elif PROTO_SBUS
 #define PROD_PREFIX SbusJoystick
+#elif PROTO_GHST
+#define PROD_PREFIX GhstJoystick
 #endif
 
 
@@ -81,9 +83,6 @@
 #define USBD_PRODUCT_STRING_FS        STRINGIFY(PROD_PREFIX)
 #define USBD_CONFIGURATION_STRING_FS  STRINGIFY(CONCAT(PROD_PREFIX,Config))
 #define USBD_INTERFACE_STRING_FS      STRINGIFY(CONCAT(PROD_PREFIX,Interface))
-//#define USBD_PRODUCT_STRING_FS     "CrsfJoystick"
-//#define USBD_CONFIGURATION_STRING_FS     "CrsfJoystick Config"
-//#define USBD_INTERFACE_STRING_FS     "CrsfJoystick Interface"
 
 /* USER CODE BEGIN PRIVATE_DEFINES */
 static const char * USBD_PRODUCT = USBD_PRODUCT_STRING_FS;
