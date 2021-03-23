@@ -8,9 +8,13 @@
 #define GHST_RX_BAUDRATE                420000
 
 // OUT to flight controller
-#define CHANNEL_OUT_VALUE_MIN 172
-#define CHANNEL_OUT_VALUE_MID 992
-#define CHANNEL_OUT_VALUE_MAX 1811
+#define GHST_MIN 172
+#define GHST_MID 992
+#define GHST_MAX 1811
+
+#define GHST_SWITCH_MIN 0
+#define GHST_SWITCH_MAX 255
+
 #define RX_BAUDRATE GHST_RX_BAUDRATE
 
 

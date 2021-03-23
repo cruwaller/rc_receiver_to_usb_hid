@@ -12,9 +12,9 @@
 #define SBUS_ENDBYTE           0x00
 
 // OUT to flight controller
-#define CHANNEL_OUT_VALUE_MIN   172
-#define CHANNEL_OUT_VALUE_MID   992
-#define CHANNEL_OUT_VALUE_MAX   1811
+#define SBUS_MIN   172
+#define SBUS_MID   992
+#define SBUS_MAX   1811
 #if SBUS_FAST
 #define RX_BAUDRATE             200000
 #else

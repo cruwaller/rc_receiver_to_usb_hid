@@ -23,10 +23,20 @@
 
 
 // OUT to flight controller
-#define CHANNEL_OUT_VALUE_MIN 172
-#define CHANNEL_OUT_VALUE_MID 992
-#define CHANNEL_OUT_VALUE_MAX 1811
+#define ELRS_MIN        0
+#define ELRS_MAX        1023
+#define ELRS_SWITCH_MIN 0
+#define ELRS_SWITCH_MAX 6
+
+#define CRSF_MIN        172
+#define CRSF_MID        992
+#define CRSF_MAX        1811
+
+#if PROTO_ELRS
+#define RX_BAUDRATE 691200
+#else
 #define RX_BAUDRATE CRSF_RX_BAUDRATE
+#endif
 
 //////////////////////////////////////////////////////////////
 
@@ -35,9 +45,11 @@ enum crsf_frame_type_e
     CRSF_FRAMETYPE_GPS = 0x02,
     CRSF_FRAMETYPE_BATTERY_SENSOR = 0x08,
     CRSF_FRAMETYPE_LINK_STATISTICS = 0x14,
+    CRSF_FRAMETYPE_LINK_STATISTICS_ELRS = 0x15,
     CRSF_FRAMETYPE_OPENTX_SYNC = 0x10,
     CRSF_FRAMETYPE_RADIO_ID = 0x3A,
     CRSF_FRAMETYPE_RC_CHANNELS_PACKED = 0x16,
+    CRSF_FRAMETYPE_RC_CHANNELS_PACKED_ELRS = 0x17,
     CRSF_FRAMETYPE_ATTITUDE = 0x1E,
     CRSF_FRAMETYPE_FLIGHT_MODE = 0x21,
     // Extended Header Frames, range: 0x28 to 0x96
@@ -128,6 +140,22 @@ typedef struct crsf_channels_s
     unsigned ch14 : 11;
     unsigned ch15 : 11;
 } PACKED crsf_channels_t;
+
+typedef struct elrs_channels_s {
+    // 64 bits of data (4 x 10 bits + 8 x 3 bits channels) = 8 bytes.
+    unsigned int analog0 : 10;
+    unsigned int analog1 : 10;
+    unsigned int analog2 : 10;
+    unsigned int analog3 : 10;
+    unsigned int aux4 : 3;
+    unsigned int aux5 : 3;
+    unsigned int aux6 : 3;
+    unsigned int aux7 : 3;
+    unsigned int aux8 : 3;
+    unsigned int aux9 : 3;
+    unsigned int aux10 : 3;
+    unsigned int aux11 : 3;
+} PACKED elrs_channels_t;
 
 typedef struct crsf_channels_msg_s
 {

@@ -37,11 +37,6 @@ extern "C" {
   * @{
   */
 
-#define NUM_ANALOGS 0x4U
-#define NUM_BUTTONS 0x4U
-#define ANALOG_MIN  0U
-#define ANALOG_MAX  2047U
-
 
 /** @defgroup USBD_HID_Exported_Defines
   * @{

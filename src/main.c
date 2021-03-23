@@ -29,6 +29,7 @@
 #endif
 #include "usb_device.h"   // hUsbDeviceFS
 #include "usbd_hid.h"     // USBD_HID_SendReport
+#include "defines.h"
 
 
 /* Private includes ----------------------------------------------------------*/
@@ -258,16 +259,17 @@ GPIO_Setup(uint32_t gpio, uint32_t mode, int pullup)
   return (struct gpio_pin){.reg = port, .bit = (1 << pin)};
 }
 
-uint8_t hid_data[2*NUM_ANALOGS + 1];
+uint8_t hid_data[2*NUM_ANALOGS + ((NUM_BUTTONS + 7) / 8)];
 
-void send_to_usb(uint16_t * rc_data, uint8_t len)
+static void send_to_usb(uint16_t * rc_data, uint8_t len)
 {
-  uint8_t iter, btns;
+  uint8_t * hid_out = &hid_data[0];
   uint16_t value;
+  uint8_t iter, btns;
 
 #if defined(LATENCY_TEST)
   // 1st switch (AUX) is used to trigger
-  if ((2 * CHANNEL_OUT_VALUE_MIN) <= rc_data[AUX1]) {
+  if ((ANALOG_MIN + 100) <= rc_data[AUX1]) {
     GPIO_Write(test_io_in, 0);
     uint32_t diff = micros() - test_triggered;
     (void)diff;
@@ -278,21 +280,20 @@ void send_to_usb(uint16_t * rc_data, uint8_t len)
   // analog channels
   for (iter = 0; iter < NUM_ANALOGS; iter++) {
     /*report.analogs[iter] =*/
-    value = MAP_U16(rc_data[iter],
-      CHANNEL_OUT_VALUE_MIN, CHANNEL_OUT_VALUE_MAX,
-      ANALOG_MIN, ANALOG_MAX);
-    hid_data[2*iter] = (uint8_t)value;
-    hid_data[2*iter+1] = (uint8_t)(value >> 8);
+    value = rc_data[iter];
+    *hid_out++ = (uint8_t)value;
+    *hid_out++ = (uint8_t)(value >> 8);
   }
 
   // buttons are bit
   value = 0;
-  for (btns = 0; iter < len; iter++, btns++) {
-    if (CHANNEL_OUT_VALUE_MID <= rc_data[iter])
+  for (btns = 0; iter < (NUM_ANALOGS + NUM_BUTTONS); iter++, btns++) {
+    if ((ANALOG_MID / 2) <= rc_data[iter])
       value |= (1 << btns);
   }
-  hid_data[2*NUM_ANALOGS] = (uint8_t)value;
-  USBD_HID_SendReport(&hUsbDeviceFS, (uint8_t*)&hid_data, sizeof(hid_data));
+  *hid_out++ = (uint8_t)value;
+
+  USBD_HID_SendReport(&hUsbDeviceFS, hid_data, (hid_out - hid_data));
 }
 
 

@@ -1,5 +1,6 @@
 #include "ghst.h"
 #include "crc.h"
+#include "defines.h"
 
 
 static uint16_t _channels[GHST_NUM_OF_CHANNELS];
@@ -41,14 +42,10 @@ static uint8_t processPacket(uint8_t const *data)
     _channels[3] = channels_msg->ch1to4.ch4 >> 1;
 
     if (switchidx) {
-        //_channels[switchidx++] = MAP_U16(channels_msg->aux.cha, 0, 255, CHANNEL_OUT_VALUE_MIN, CHANNEL_OUT_VALUE_MAX);
-        //_channels[switchidx++] = MAP_U16(channels_msg->aux.chb, 0, 255, CHANNEL_OUT_VALUE_MIN, CHANNEL_OUT_VALUE_MAX);
-        //_channels[switchidx++] = MAP_U16(channels_msg->aux.chc, 0, 255, CHANNEL_OUT_VALUE_MIN, CHANNEL_OUT_VALUE_MAX);
-        //_channels[switchidx++] = MAP_U16(channels_msg->aux.chd, 0, 255, CHANNEL_OUT_VALUE_MIN, CHANNEL_OUT_VALUE_MAX);
-        _channels[switchidx++] = channels_msg->aux.cha << 3;
-        _channels[switchidx++] = channels_msg->aux.chb << 3;
-        _channels[switchidx++] = channels_msg->aux.chc << 3;
-        _channels[switchidx++] = channels_msg->aux.chd << 3;
+        _channels[switchidx++] = channels_msg->aux.cha;
+        _channels[switchidx++] = channels_msg->aux.chb;
+        _channels[switchidx++] = channels_msg->aux.chc;
+        _channels[switchidx++] = channels_msg->aux.chd;
     }
     return 1;
 }
@@ -116,7 +113,12 @@ uint8_t ghst_parse_byte(uint8_t const inChar)
 void ghst_get_rc_data(uint16_t * const rc_data, uint8_t len)
 {
     uint8_t iter;
-    for (iter = 0; iter < len && iter < ARRAY_SIZE(_channels); iter++) {
-        rc_data[iter] = _channels[iter];
+    for (iter = 0; iter < 4 && iter < ARRAY_SIZE(_channels); iter++) {
+        rc_data[iter] = MAP_U16(_channels[iter],
+            GHST_MIN, GHST_MAX, ANALOG_MIN, ANALOG_MAX);
+    }
+    for (; iter < len && iter < ARRAY_SIZE(_channels); iter++) {
+        rc_data[iter] = MAP_U16(_channels[iter],
+            GHST_SWITCH_MIN, GHST_SWITCH_MAX, ANALOG_MIN, ANALOG_MAX);
     }
 }
