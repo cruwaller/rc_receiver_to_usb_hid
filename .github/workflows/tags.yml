@@ -72,6 +72,46 @@ jobs:
           asset_name: release_${{ steps.get_version.outputs.SOURCE_TAG }}_Sim_SBUS.bin
           asset_content_type: application/octet-stream
 
+      - name: Upload Binaries, SBUS, 6xFULL
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above
+          asset_path: ./.pio/build/Sim_SBUS_6xFULL/firmware.bin
+          asset_name: release_${{ steps.get_version.outputs.SOURCE_TAG }}_Sim_SBUS_6xFULL.bin
+          asset_content_type: application/octet-stream
+
+      - name: Upload Binaries, SBUS, 8xFULL
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above
+          asset_path: ./.pio/build/Sim_SBUS_8xFULL/firmware.bin
+          asset_name: release_${{ steps.get_version.outputs.SOURCE_TAG }}_Sim_SBUS_8xFULL.bin
+          asset_content_type: application/octet-stream
+
+      - name: Upload Binaries, GHST
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above
+          asset_path: ./.pio/build/Sim_GHST/firmware.bin
+          asset_name: release_${{ steps.get_version.outputs.SOURCE_TAG }}_Sim_GHST.bin
+          asset_content_type: application/octet-stream
+
+      - name: Upload Binaries, ELRS
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above
+          asset_path: ./.pio/build/Sim_ELRS/firmware.bin
+          asset_name: release_${{ steps.get_version.outputs.SOURCE_TAG }}_Sim_ELRS.bin
+          asset_content_type: application/octet-stream
+
       - name: Upload Sources
         id: upload-release-asset
         uses: actions/upload-release-asset@v1
