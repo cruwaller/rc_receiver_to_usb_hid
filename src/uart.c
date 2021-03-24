@@ -10,6 +10,7 @@
 #include "uart.h"
 #include "main.h"
 #include "irq.h"
+#include "defines.h"
 #include <string.h>
 
 #ifndef USART_USE_RX_ISR
@@ -65,7 +66,7 @@ enum
   DUPLEX_TX,
 };
 
-void duplex_state_set(const uint8_t state)
+FAST_CODE_1 void duplex_state_set(const uint8_t state)
 {
   USART_TypeDef *handle = UART_handle_tx;
   if (state == DUPLEX_TX) {
@@ -100,13 +101,13 @@ static uint8_t rx_buffer[256];
 static uint8_t tx_head, tx_tail;
 static uint8_t tx_buffer[256];
 
-int rx_buffer_available(void)
+FAST_CODE_1 int rx_buffer_available(void)
 {
     uint8_t head = read_u8(&rx_head), tail = read_u8(&rx_tail);
     return (uint8_t)(head - tail);
 }
 
-int rx_buffer_read(void)
+FAST_CODE_1 int rx_buffer_read(void)
 {
     if (!rx_buffer_available())
         return -1;
@@ -115,7 +116,7 @@ int rx_buffer_read(void)
     return rx_buffer[tail++];
 }
 
-int tx_buffer_push(const uint8_t *buff, uint32_t len)
+FAST_CODE_1 int tx_buffer_push(const uint8_t *buff, uint32_t len)
 {
   uint_fast8_t tmax = read_u8(&tx_head), tpos = read_u8(&tx_tail);
   if (tpos >= tmax) {
@@ -144,7 +145,7 @@ int tx_buffer_push(const uint8_t *buff, uint32_t len)
   return len;
 }
 
-void uart_flush(void)
+FAST_CODE_1 void uart_flush(void)
 {
   while (UART_handle_tx->CR1 & USART_TX_ISR)
     ;
@@ -152,7 +153,7 @@ void uart_flush(void)
 
 // ***********************
 
-void USARTx_IRQ_handler(USART_TypeDef * uart)
+FAST_CODE_1 void USARTx_IRQ_handler(USART_TypeDef * uart)
 {
   uint32_t SR = uart->StatReg, CR = uart->CR1;
   /* Check for RX data */
@@ -178,16 +179,16 @@ void USARTx_IRQ_handler(USART_TypeDef * uart)
 }
 
 
-void USART1_IRQHandler(void)
+FAST_CODE_1 void USART1_IRQHandler(void)
 {
   USARTx_IRQ_handler(USART1);
 }
-void USART2_IRQHandler(void)
+FAST_CODE_1 void USART2_IRQHandler(void)
 {
   USARTx_IRQ_handler(USART2);
 }
 #if defined(USART3)
-void USART3_IRQHandler(void)
+FAST_CODE_1 void USART3_IRQHandler(void)
 {
   USARTx_IRQ_handler(USART3);
 }
@@ -195,7 +196,7 @@ void USART3_IRQHandler(void)
 
 // **************************************************
 
-uart_status uart_clear(void)
+FAST_CODE_1 uart_status uart_clear(void)
 {
   USART_TypeDef *handle = UART_handle_rx;
 
@@ -222,12 +223,12 @@ uart_status uart_clear(void)
  * @param   length:  Size of the data.
  * @return  status: Report about the success of the receiving.
  */
-uart_status uart_receive(uint8_t *data, uint16_t length)
+FAST_CODE_1 uart_status uart_receive(uint8_t *data, uint16_t length)
 {
   return uart_receive_timeout(data, length, UART_TIMEOUT);
 }
 
-uart_status uart_receive_timeout(uint8_t *data, uint16_t length, uint16_t timeout)
+FAST_CODE_1 uart_status uart_receive_timeout(uint8_t *data, uint16_t length, uint16_t timeout)
 {
   uint32_t tickstart, SR;
 
@@ -282,7 +283,7 @@ uart_status uart_receive_timeout(uint8_t *data, uint16_t length, uint16_t timeou
  * @param   *data: Array of the data.
  * @return  status: Report about the success of the transmission.
  */
-uart_status uart_transmit_str(char *data)
+FAST_CODE_1 uart_status uart_transmit_str(char *data)
 {
   uint32_t length = 0u;
   /* Calculate the length. */
@@ -297,12 +298,12 @@ uart_status uart_transmit_str(char *data)
  * @param   *data: The char.
  * @return  status: Report about the success of the transmission.
  */
-uart_status uart_transmit_ch(uint8_t data)
+FAST_CODE_1 uart_status uart_transmit_ch(uint8_t data)
 {
   return uart_transmit_bytes(&data, 1u);
 }
 
-uart_status uart_transmit_bytes(uint8_t *data, uint32_t len)
+FAST_CODE_1 uart_status uart_transmit_bytes(uint8_t *data, uint32_t len)
 {
   uart_status status = UART_OK;
   USART_TypeDef *handle = UART_handle_tx;

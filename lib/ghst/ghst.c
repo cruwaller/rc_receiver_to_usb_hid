@@ -13,7 +13,7 @@ static uint8_t SerialInPacketPtr;
 static uint8_t frameActive;
 
 
-static uint8_t processPacket(uint8_t const *data)
+static FAST_CODE_1 uint8_t processPacket(uint8_t const *data)
 {
     const ghstPayloadPulses_t * channels_msg = (ghstPayloadPulses_t*)&data[1];
     uint8_t switchidx = 0;
@@ -51,7 +51,7 @@ static uint8_t processPacket(uint8_t const *data)
 }
 
 
-uint8_t ghst_parse_byte(uint8_t const inChar)
+FAST_CODE_1 uint8_t ghst_parse_byte(uint8_t const inChar)
 {
     uint8_t frame_ok = 0;
 
@@ -110,7 +110,7 @@ uint8_t ghst_parse_byte(uint8_t const inChar)
 }
 
 
-void ghst_get_rc_data(uint16_t * const rc_data, uint8_t len)
+FAST_CODE_1 void ghst_get_rc_data(uint16_t * const rc_data, uint8_t len)
 {
     uint8_t iter;
     for (iter = 0; iter < 4 && iter < ARRAY_SIZE(_channels); iter++) {

@@ -66,14 +66,16 @@ extern uint32_t SystemCoreClock;
 #define clockCyclesToMicroseconds(a) ( (a) / clockCyclesPerMicrosecond() )
 #define microsecondsToClockCycles(a) ( (a) * clockCyclesPerMicrosecond() )
 
-uint32_t timer_read_time(void)
+FAST_CODE_1 uint32_t timer_read_time(void)
 {
   return DWT->CYCCNT;
 }
-uint32_t micros(void)
+
+FAST_CODE_1 uint32_t micros(void)
 {
   return clockCyclesToMicroseconds(timer_read_time());
 }
+
 #ifdef DWT_BASE
 static void dwt_access(uint8_t ena)
 {
@@ -261,7 +263,7 @@ GPIO_Setup(uint32_t gpio, uint32_t mode, int pullup)
 
 uint8_t hid_data[2*NUM_ANALOGS + ((NUM_BUTTONS + 7) / 8)];
 
-static void send_to_usb(uint16_t * rc_data, uint8_t len)
+static FAST_CODE_1 void send_to_usb(uint16_t * rc_data, uint8_t len)
 {
   uint8_t * hid_out = &hid_data[0];
   uint16_t value;
@@ -296,45 +298,8 @@ static void send_to_usb(uint16_t * rc_data, uint8_t len)
   USBD_HID_SendReport(&hUsbDeviceFS, hid_data, (hid_out - hid_data));
 }
 
-
-/**
-  * @brief  The application entry point.
-  * @retval int
-  */
-int main(void)
+static FAST_CODE_1 void main_loop(void)
 {
-  /* MCU Configuration--------------------------------------------------------*/
-  __HAL_RCC_AFIO_CLK_ENABLE();
-  __HAL_RCC_PWR_CLK_ENABLE();
-  //__HAL_AFIO_REMAP_SWJ_DISABLE();
-
-    /* Init DWT if present */
-#ifdef DWT_BASE
-    if (dwt_init()) {
-        Error_Handler();
-    }
-#endif
-
-  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-  HAL_Init();
-  /* Configure the system clock */
-  SystemClock_Config();
-  /* Init USB D+ pin to avoid issue with clone Bluepill boards.
-   * Source: http://amitesh-singh.github.io/stm32/2017/05/27/Overcoming-wrong-pullup-in-blue-pill.html
-   */
-  GPIO_Setup(GPIO('A', 12), GPIO_OUTPUT, -1);
-  HAL_Delay(5);
-
-#if defined(LATENCY_TEST)
-  test_io_out = GPIO_Setup(PIN_IO_TEST_OUT, GPIO_OUTPUT, -1);
-  test_io_in = GPIO_Setup(PIN_IO_TEST_IN, GPIO_OUTPUT, -1);
-#endif
-
-  // UART init
-  uart_init(RX_BAUDRATE, RECEIVER_UART_RX, DBG_UART_TX);
-  // USB HID init
-  MX_USB_DEVICE_Init();
-
   /* Infinite loop */
 #if defined(LATENCY_TEST)
   uint32_t last = HAL_GetTick();
@@ -376,6 +341,60 @@ int main(void)
     }
 #endif
   }
+}
+
+
+static void copy_functions_to_ram(void)
+{
+  /* Load functions into ITCM RAM */
+  extern uint8_t ram_code_start;
+  extern uint8_t ram_code_end;
+  extern uint8_t ram_code;
+  memcpy(&ram_code_start, &ram_code, (size_t) (&ram_code_end - &ram_code_start));
+}
+
+
+/**
+  * @brief  The application entry point.
+  * @retval int
+  */
+int main(void)
+{
+  copy_functions_to_ram();
+
+  /* MCU Configuration--------------------------------------------------------*/
+  __HAL_RCC_AFIO_CLK_ENABLE();
+  __HAL_RCC_PWR_CLK_ENABLE();
+  //__HAL_AFIO_REMAP_SWJ_DISABLE();
+
+    /* Init DWT if present */
+#ifdef DWT_BASE
+    if (dwt_init()) {
+        Error_Handler();
+    }
+#endif
+
+  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
+  HAL_Init();
+  /* Configure the system clock */
+  SystemClock_Config();
+  /* Init USB D+ pin to avoid issue with clone Bluepill boards.
+   * Source: http://amitesh-singh.github.io/stm32/2017/05/27/Overcoming-wrong-pullup-in-blue-pill.html
+   */
+  GPIO_Setup(GPIO('A', 12), GPIO_OUTPUT, -1);
+  HAL_Delay(5);
+
+#if defined(LATENCY_TEST)
+  test_io_out = GPIO_Setup(PIN_IO_TEST_OUT, GPIO_OUTPUT, -1);
+  test_io_in = GPIO_Setup(PIN_IO_TEST_IN, GPIO_OUTPUT, -1);
+#endif
+
+  // UART init
+  uart_init(RX_BAUDRATE, RECEIVER_UART_RX, DBG_UART_TX);
+  // USB HID init
+  MX_USB_DEVICE_Init();
+
+  main_loop();
 }
 
 
@@ -422,6 +441,8 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
+
+  SystemCoreClockUpdate();
 }
 
 /**

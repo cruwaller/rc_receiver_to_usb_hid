@@ -8,7 +8,7 @@ static uint8_t buffer[25];
 static uint8_t buffer_index = 0;
 
 
-uint8_t sbus_parse_byte(uint8_t inChar)
+FAST_CODE_1 uint8_t sbus_parse_byte(uint8_t inChar)
 {
     if (!buffer_index && inChar != SBUS_STARTBYTE) {
         //incorrect start byte, out of sync
@@ -45,7 +45,7 @@ uint8_t sbus_parse_byte(uint8_t inChar)
     return 1;
 }
 
-void sbus_get_rc_data(uint16_t * const rc_data, uint8_t len)
+FAST_CODE_1 void sbus_get_rc_data(uint16_t * const rc_data, uint8_t len)
 {
     uint8_t iter;
     for (iter = 0; iter < len && iter < ARRAY_SIZE(_channels); iter++) {

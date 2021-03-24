@@ -18,7 +18,7 @@ static uint8_t SerialInPacketPtr;      // index where we are reading/writing
 static uint16_t _channels[MAX_CHAHNELS];
 
 
-static uint8_t crsf_check_msg(uint8_t const * const input)
+static FAST_CODE_1 uint8_t crsf_check_msg(uint8_t const * const input)
 {
     switch (input[0]) {
 #if PROTO_ELRS
@@ -66,7 +66,7 @@ static uint8_t crsf_check_msg(uint8_t const * const input)
 }
 
 
-uint8_t crsf_parse_byte(uint8_t inChar)
+FAST_CODE_1 uint8_t crsf_parse_byte(uint8_t inChar)
 {
     uint8_t ret = 0;
 
@@ -126,7 +126,7 @@ uint8_t crsf_parse_byte(uint8_t inChar)
 }
 
 
-void crsf_get_rc_data(uint16_t * const rc_data, uint8_t len)
+FAST_CODE_1 void crsf_get_rc_data(uint16_t * const rc_data, uint8_t len)
 {
     uint8_t iter;
 #if PROTO_ELRS

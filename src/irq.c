@@ -6,20 +6,21 @@
 // This file may be distributed under the terms of the GNU GPLv3 license.
 
 #include "irq.h" // irqstatus_t
+#include "defines.h"
 
-void irq_disable(void)
+FAST_CODE_1 void irq_disable(void)
 {
     asm volatile("cpsid i" ::
                      : "memory");
 }
 
-void irq_enable(void)
+FAST_CODE_1 void irq_enable(void)
 {
     asm volatile("cpsie i" ::
                      : "memory");
 }
 
-irqstatus_t
+FAST_CODE_1 irqstatus_t
 irq_save(void)
 {
     irqstatus_t flag;
@@ -29,24 +30,24 @@ irq_save(void)
     return flag;
 }
 
-void irq_restore(irqstatus_t flag)
+FAST_CODE_1 void irq_restore(irqstatus_t flag)
 {
     asm volatile("msr primask, %0" ::"r"(flag)
                  : "memory");
 }
 
-void irq_wait(void)
+FAST_CODE_1 void irq_wait(void)
 {
     asm volatile("cpsie i\n    wfi\n    cpsid i\n" ::
                      : "memory");
 }
 
-void irq_poll(void)
+FAST_CODE_1 void irq_poll(void)
 {
 }
 
 // Clear the active irq if a shutdown happened in an irq handler
-void clear_active_irq(void)
+FAST_CODE_1 void clear_active_irq(void)
 {
     uint32_t psr;
     asm volatile("mrs %0, psr"

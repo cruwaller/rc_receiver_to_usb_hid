@@ -537,11 +537,12 @@ static uint8_t  USBD_HID_Setup(USBD_HandleTypeDef *pdev,
   * @param  buff: pointer to report
   * @retval status
   */
-uint8_t USBD_HID_SendReport(USBD_HandleTypeDef  *pdev,
-                            uint8_t *report,
-                            uint16_t len)
+FAST_CODE_1 uint8_t
+USBD_HID_SendReport(USBD_HandleTypeDef  *pdev,
+                    uint8_t *report,
+                    uint16_t len)
 {
-  USBD_HID_HandleTypeDef     *hhid = (USBD_HID_HandleTypeDef *)pdev->pClassData;
+  USBD_HID_HandleTypeDef *hhid = (USBD_HID_HandleTypeDef *)pdev->pClassData;
 
   if (pdev->dev_state == USBD_STATE_CONFIGURED)
   {
