@@ -73,8 +73,10 @@ EndBSPDependencies */
 #if 8 < NUM_BUTTONS
 #error "Up to 8 buttons!"
 #endif
-#if NUM_ANALOGS != 4
-#error "NUM_ANALOGS must be 4"
+#if NUM_ANALOGS < 4
+#error "NUM_ANALOGS must be at least 4"
+#elif 10 < NUM_ANALOGS
+#error "NUM_ANALOGS max is 10"
 #endif
 
 #define SIZE_OF_REPORT sizeof(HID_Joystick_ReportDesc)
@@ -89,12 +91,30 @@ static const uint8_t HID_Joystick_ReportDesc[] =
   0x05, 0x01,                    //     USAGE_PAGE (Generic Desktop)
   0x09, 0x30,                    //     USAGE (X)
   0x09, 0x31,                    //     USAGE (Y)
+#if 5 <= NUM_ANALOGS
+  0x09, 0x32,                    //     USAGE (Z)
+#endif
   0x09, 0x33,                    //     USAGE (Rx)
   0x09, 0x34,                    //     USAGE (Ry)
+#if 6 <= NUM_ANALOGS
+  0x09, 0x35,                    //     USAGE (Rz)
+#endif
+#if 7 <= NUM_ANALOGS
+  0x09, 0x36,                    //     USAGE (Slider)
+#endif
+#if 8 <= NUM_ANALOGS
+  0x09, 0x37,                    //     USAGE (Dial)
+#endif
+#if 9 <= NUM_ANALOGS
+  0x09, 0x38,                    //     USAGE (Wheel)
+#endif
+#if 10 <= NUM_ANALOGS
+  0x09, 0x39,                    //     USAGE (Hat switch)
+#endif
   0x16, 0x00, 0x00,              //     LOGICAL_MINIMUM (0)
   0x26, 0xFF, 0x07,              //     LOGICAL_MAXIMUM (2047)
   0x75, 0x10,                    //     REPORT_SIZE (16)
-  0x95, 0x04,                    //     REPORT_COUNT (4)
+  0x95, NUM_ANALOGS,             //     REPORT_COUNT
   0x81, 0x02,                    //     INPUT (Data,Var,Abs)
   /* Buttons */
   0x05, 0x09,                    //     USAGE_PAGE (Button)

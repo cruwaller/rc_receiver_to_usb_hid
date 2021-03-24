@@ -1,8 +1,11 @@
 #pragma once
 
-
+#ifndef NUM_ANALOGS
 #define NUM_ANALOGS 0x4U
+#endif
+#ifndef NUM_BUTTONS
 #define NUM_BUTTONS 0x4U
+#endif
 #define ANALOG_MIN  0U
 #define ANALOG_MID  1024U
 #define ANALOG_MAX  2047U
