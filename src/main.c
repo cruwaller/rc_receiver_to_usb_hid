@@ -279,23 +279,26 @@ static FAST_CODE_1 void send_to_usb(uint16_t * rc_data, uint8_t len)
   GPIO_Write(test_io_out, 0);
 #endif
 
-  // analog channels
-  for (iter = 0; iter < NUM_ANALOGS; iter++) {
-    /*report.analogs[iter] =*/
-    value = rc_data[iter];
+  /* Check if free */
+  if (USBD_HID_CanTransmit(&hUsbDeviceFS) == USBD_OK) {
+    // analog channels
+    for (iter = 0; iter < NUM_ANALOGS; iter++) {
+      /*report.analogs[iter] =*/
+      value = rc_data[iter];
+      *hid_out++ = (uint8_t)value;
+      *hid_out++ = (uint8_t)(value >> 8);
+    }
+
+    // buttons are bit
+    value = 0;
+    for (btns = 0; iter < (NUM_ANALOGS + NUM_BUTTONS); iter++, btns++) {
+      if ((ANALOG_MID / 2) <= rc_data[iter])
+        value |= (1 << btns);
+    }
     *hid_out++ = (uint8_t)value;
-    *hid_out++ = (uint8_t)(value >> 8);
-  }
 
-  // buttons are bit
-  value = 0;
-  for (btns = 0; iter < (NUM_ANALOGS + NUM_BUTTONS); iter++, btns++) {
-    if ((ANALOG_MID / 2) <= rc_data[iter])
-      value |= (1 << btns);
+    USBD_HID_SendReport(&hUsbDeviceFS, hid_data, (hid_out - hid_data));
   }
-  *hid_out++ = (uint8_t)value;
-
-  USBD_HID_SendReport(&hUsbDeviceFS, hid_data, (hid_out - hid_data));
 }
 
 static FAST_CODE_1 void main_loop(void)

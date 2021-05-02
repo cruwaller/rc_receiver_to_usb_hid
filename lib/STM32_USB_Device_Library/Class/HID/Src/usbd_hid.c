@@ -236,11 +236,12 @@ __ALIGN_BEGIN static uint8_t USBD_HID_CfgDesc[USB_HID_CONFIG_DESC_SIZ]  __ALIGN_
   0x07,          /*bLength: Endpoint Descriptor size*/
   USB_DESC_TYPE_ENDPOINT, /*bDescriptorType:*/
 
-  HID_EPIN_ADDR,     /*bEndpointAddress: Endpoint Address (IN)*/
-  0x03,          /*bmAttributes: Interrupt endpoint*/
-  HID_EPIN_SIZE, /*wMaxPacketSize: 4 Byte max */
+  HID_EPIN_ADDR,      /*bEndpointAddress: Endpoint Address (IN)*/
+  0x03,               /*bmAttributes: Interrupt endpoint*/
+  //0x01,               /* TODO: TEST bmAttributes: Isochronous Transfers */
+  HID_EPIN_SIZE,      /* wMaxPacketSize */
   0x00,
-  HID_FS_BINTERVAL,          /*bInterval: Polling Interval */
+  HID_FS_BINTERVAL,   /*bInterval: Polling Interval */
   /* 34 */
 };
 #if 0
@@ -576,6 +577,14 @@ USBD_HID_SendReport(USBD_HandleTypeDef  *pdev,
     }
   }
   return USBD_OK;
+}
+
+FAST_CODE_1 uint8_t
+USBD_HID_CanTransmit(USBD_HandleTypeDef const * const pdev)
+{
+  USBD_HID_HandleTypeDef const * const hhid = (USBD_HID_HandleTypeDef *)pdev->pClassData;
+  uint8_t state = (pdev->dev_state == USBD_STATE_CONFIGURED) && (hhid->state == HID_IDLE);
+  return (state ? USBD_OK : USBD_BUSY);
 }
 
 /**
