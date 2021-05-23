@@ -49,7 +49,11 @@ void Error_Handler(void);
 //#define DBG_UART_RX GPIO('A', 10)
 
 //#define RECEIVER_UART_TX GPIO('A', 2)
+// next line is for default Bluepill RX pin
 #define RECEIVER_UART_RX GPIO('A', 3)
+// next line is for CC3D Flexi port RX pin
+// #define RECEIVER_UART_RX GPIO('C', 11)
+
 
 
 
