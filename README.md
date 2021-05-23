@@ -2,10 +2,11 @@
 This project utilizes a Bluepill board (STM32F103C8) to allow the connection of a digital RC reciever as a USB computer joystick (USB HID device).
 
 # Supported RC Protocols
-CRSF
-SBUS
-GHST
-ELRS
+
+* CRSF and CRSFv3 (baudrate negotiation not supported at the moment)
+* SBUS
+* GHST
+* ELRS
 
 # preparing
 ### precompiled binaries
