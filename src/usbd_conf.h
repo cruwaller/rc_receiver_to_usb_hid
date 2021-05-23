@@ -75,7 +75,8 @@
 /*---------- -----------*/
 //#define HID_FS_BINTERVAL      0xA
 //#define HID_FS_BINTERVAL      0x1
-#define HID_FS_BINTERVAL      0x3
+//#define HID_FS_BINTERVAL      0x3
+#define HID_FS_BINTERVAL      0x2
 #define HID_HS_BINTERVAL      0x07U
 
 /****************************************/
