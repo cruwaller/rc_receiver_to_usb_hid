@@ -1,3 +1,12 @@
+# Usage
+This project utilizes a Bluepill board (STM32F103C8) to allow the connection of a digital RC reciever as a USB computer joystick (USB HID device).
+
+# Supported RC Protocols
+CRSF
+SBUS
+GHST
+ELRS
+
 # preparing
 ### precompiled binaries
 Precompiled binaries can be downloaded from [releases](https://github.com/cruwaller/rc_receiver_to_usb_hid/releases) page.
@@ -21,3 +30,4 @@ wiring:
 | TX       | PA3 (USART2 RX) |
 | 5V       | 5V       |
 | GND      | GND      |
+| RX       | not connected |
