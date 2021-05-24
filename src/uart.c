@@ -514,4 +514,7 @@ void uart_deinit(void)
     uart_reset(UART_handle_rx);
   if (UART_handle_rx != UART_handle_tx)
     uart_reset(UART_handle_tx);
+
+  UART_handle_rx = NULL;
+  UART_handle_tx = NULL;
 }

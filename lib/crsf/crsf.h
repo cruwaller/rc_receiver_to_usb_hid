@@ -73,6 +73,17 @@ enum crsf_frame_type_e
     CRSF_FRAMETYPE_DISPLAYPORT_CMD = 0x7D, // displayport control command
 };
 
+enum
+{
+    CRSF_COMMAND_SUBCMD_GENERAL = 0x0A,    // general command
+};
+
+enum
+{
+    CRSF_COMMAND_SUBCMD_GENERAL_CRSF_SPEED_PROPOSAL = 0x70,    // proposed new CRSF port speed
+    CRSF_COMMAND_SUBCMD_GENERAL_CRSF_SPEED_RESPONSE = 0x71,    // response to the proposed CRSF port speed
+};
+
 enum crsf_addr_e
 {
     CRSF_ADDRESS_BROADCAST = 0x00,

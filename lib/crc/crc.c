@@ -21,7 +21,40 @@ uint8_t DRAM_FORCED crc8tab[256] = {
     0x84, 0x51, 0xFB, 0x2E, 0x7A, 0xAF, 0x05, 0xD0, 0xAD, 0x78, 0xD2, 0x07, 0x53, 0x86, 0x2C, 0xF9};
 
 // this is same as crc8_dvb_s2
-FAST_CODE_1 uint8_t CalcCRC(uint8_t data, uint8_t crc)
+uint8_t FAST_CODE_1
+CalcCRC(uint8_t data, uint8_t crc)
 {
     return crc8tab[crc ^ data];
+}
+
+uint8_t FAST_CODE_1
+CalcCRClen(uint8_t const *data, uint16_t length, uint8_t crc)
+{
+    while (length--) {
+        crc = crc8tab[crc ^ *data++];
+    }
+    return crc;
+}
+
+
+uint8_t FAST_CODE_1
+CalcCRC8(uint8_t const data, uint8_t crc, uint8_t const poly)
+{
+    crc ^= data;
+    for (int ii = 0; ii < 8; ++ii) {
+        if (crc & 0x80)
+            crc = (crc << 1) ^ poly;
+        else
+            crc = crc << 1;
+    }
+    return crc;
+}
+
+uint8_t FAST_CODE_1
+CalcCRC8len(uint8_t const *data, uint16_t length,
+            uint8_t crc, uint8_t const poly)
+{
+    while (length--)
+        crc = CalcCRC8(*data++, crc, poly);
+    return crc;
 }
